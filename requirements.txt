@@ -1,0 +1,25 @@
+# Bike Accident Detection System Requirements
+# ==========================================
+
+# Core data processing and analysis
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# Machine learning libraries
+scikit-learn>=1.0.0
+xgboost>=1.5.0
+
+# Deep learning
+tensorflow>=2.8.0
+
+# Visualization
+matplo2tlib>=3.5.0
+seaborn>=0.11.0
+
+# Utility libraries
+joblib>=1.1.0
+
+# Web framework for simulator
+flask>=2.0.0
+flask-cors>=3.0.0
