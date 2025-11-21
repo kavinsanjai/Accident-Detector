@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Accident Detection Simulator with Speed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .parameter-section {
+            margin-bottom: 25px;
+        }
+
+        .parameter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .parameter-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-icon {
+            cursor: help;
+            background: #667eea;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .parameter-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .slider-container {
+            position: relative;
+            margin: 10px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #2a5298;
+        }
+
+        .parameter-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 8px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .axis-indicators {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 0.85em;
+        }
+
+        .axis-indicator {
+            flex: 1;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .axis-indicator.x { border-left: 3px solid #e74c3c; }
+        .axis-indicator.y { border-left: 3px solid #2ecc71; }
+        .axis-indicator.z { border-left: 3px solid #3498db; }
+
+        .vehicle-visualization {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 15px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .speedometer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .speedometer-value {
+            font-size: 2em;
+            color: #4CAF50;
+        }
+
+        .speed-warning {
+            background: rgba(255, 152, 0, 0.2);
+            border: 2px solid #ff9800;
+        }
+
+        .speed-warning .speedometer-value {
+            color: #ff9800;
+        }
+
+        .speed-danger {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+            animation: pulse 1s infinite;
+        }
+
+        .speed-danger .speedometer-value {
+            color: #f44336;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .vehicle-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vehicle {
+            width: 160px;
+            height: 120px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        /* Simple Bike Body - Main Frame */
+        .vehicle-windshield {
+            position: absolute;
+            top: 35px;
+            left: 55px;
+            width: 50px;
+            height: 50px;
+            background: #e74c3c;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Rider - Simple representation */
+        .bike-rider {
+            position: absolute;
+            top: 10px;
+            left: 68px;
+            width: 24px;
+            height: 40px;
+            z-index: 10;
+        }
+
+        /* Rider's Head - Simple circle */
+        .bike-rider::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 4px;
+            width: 16px;
+            height: 16px;
+            background: #f39c12;
+            border-radius: 50%;
+        }
+
+        /* Rider's Body - Simple rectangle */
+        .bike-rider::after {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 6px;
+            width: 12px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 3px;
+        }
+
+        /* Bike Seat - Small element */
+        .vehicle-body {
+            position: absolute;
+            bottom: 42px;
+            left: 58px;
+            width: 44px;
+            height: 10px;
+            background: #34495e;
+            border-radius: 5px;
+        }
+
+        /* Bike Wheels - Clean circles */
+        .vehicle-wheel {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #2c3e50;
+            border-radius: 50%;
+            border: 4px solid #7f8c8d;
+            bottom: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Simple wheel center */
+        .vehicle-wheel::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: #95a5a6;
+            border-radius: 50%;
+        }
+
+        .vehicle-wheel.left { left: 15px; }
+        .vehicle-wheel.right { right: 15px; }
+
+        .impact-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        .force-arrow {
+            position: absolute;
+            background: red;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .force-arrow.active { opacity: 1; }
+
+        .arrow-x {
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 4px;
+        }
+
+        .arrow-y {
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+        }
+
+        .arrow-z {
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+        }
+
+        .rotation-indicator {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px dashed yellow;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .rotation-indicator.active {
+            opacity: 0.7;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .crash-effect {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+            10% { transform: translateX(-10px) translateY(-5px) rotate(-5deg); }
+            20% { transform: translateX(10px) translateY(5px) rotate(5deg); }
+            30% { transform: translateX(-10px) translateY(-5px) rotate(-5deg); }
+            40% { transform: translateX(10px) translateY(5px) rotate(5deg); }
+            50% { transform: translateX(-10px) translateY(-5px) rotate(-5deg); }
+            60% { transform: translateX(10px) translateY(5px) rotate(5deg); }
+            70% { transform: translateX(-5px) translateY(-3px) rotate(-3deg); }
+            80% { transform: translateX(5px) translateY(3px) rotate(3deg); }
+            90% { transform: translateX(-5px) translateY(-3px) rotate(-3deg); }
+        }
+
+        .vehicle-status {
+            margin-top: 30px;
+            color: white;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .results-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .detection-result {
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+
+        .result-safe {
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+            color: #065F46;
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .result-accident {
+            background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+            color: #991B1B;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+        }
+        
+        .result-header-flex {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+        
+        .result-icon {
+            font-size: 2.5em;
+        }
+        
+        .result-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        
+        .severity-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .explanation-section h3 {
+            font-size: 1.3em;
+            margin: 15px 0;
+        }
+        
+        .explanation-box {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .explanation-box h4 {
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .explanation-box p {
+            color: #374151;
+            line-height: 1.6;
+            font-size: 1em;
+        }
+        
+        .what-happened {
+            border-left-color: #3B82F6;
+        }
+        
+        .why-detected {
+            border-left-color: #8B5CF6;
+        }
+        
+        .analogy {
+            border-left-color: #F59E0B;
+        }
+        
+        .safety-tip {
+            border-left-color: #EF4444;
+            background: #FEF3C7;
+        }
+        
+        .technical-details {
+            margin-top: 20px;
+            padding: 15px;
+            background: #F3F4F6;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .technical-details summary {
+            font-weight: 600;
+            color: #6B7280;
+            list-style-position: outside;
+            user-select: none;
+        }
+        
+        .technical-details summary:hover {
+            color: #374151;
+        }
+        
+        .result-reason {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            color: #4B5563;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        @keyframes alert-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 6px 20px rgba(201, 42, 42, 0.4); }
+            50% { transform: scale(1.02); box-shadow: 0 8px 30px rgba(201, 42, 42, 0.6); }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2a5298;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .preset-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .preset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .preset-btn.accident {
+            background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .preset-btn.accident:hover {
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .preset-btn.safe {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            box-shadow: 0 4px 15px rgba(81, 207, 102, 0.4);
+        }
+
+        .preset-btn.safe:hover {
+            box-shadow: 0 6px 20px rgba(81, 207, 102, 0.6);
+        }
+
+        .detect-button {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+            margin-top: 20px;
+        }
+
+        .detect-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(245, 87, 108, 0.6);
+        }
+
+        .detect-button:active {
+            transform: translateY(-1px);
+        }
+
+        .educational-info {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .educational-info h3 {
+            color: #2980b9;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .educational-info ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .educational-info li {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 300px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -150px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9em;
+            line-height: 1.4;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚨 Advanced Accident Detection Simulator</h1>
+            <p>Real-time bike dynamics simulation with speed-aware detection</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Panel: Controls -->
+            <div class="left-panel">
+                <!-- Speed Control -->
+                <div class="card">
+                    <h2>🏎️ Bike Speed</h2>
+                    <div class="parameter-section">
+                        <div class="parameter-header">
+                            <div class="parameter-label">
+                                <span>Speed (km/h)</span>
+                                <div class="tooltip">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext">
+                                        <strong>Bike Speed</strong><br>
+                                        • <strong>Low (0-50 km/h):</strong> City riding, bike lanes<br>
+                                        • <strong>Medium (50-80 km/h):</strong> Main roads, suburban areas<br>
+                                        • <strong>High (80+ km/h):</strong> Highways, high-speed roads<br><br>
+                                        <strong>Impact on Detection:</strong><br>
+                                        Higher speeds amplify accident severity. Even moderate forces become dangerous at high speeds!
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="parameter-value" id="speed-value">50 km/h</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="speed" min="0" max="120" value="50" step="1">
+                        </div>
+                        <div class="parameter-description">
+                            Current speed affects collision severity. Higher speeds = more dangerous impacts!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accelerometer Controls -->
+                <div class="card">
+                    <h2>🚀 Accelerometer (G-Forces)</h2>
+                    
+                    <div class="educational-info">
+                        <h3>📚 What is an Accelerometer?</h3>
+                        <ul>
+                            <li><strong>X-Axis (Forward/Backward):</strong> Measures acceleration when moving forward or backward. Negative = Braking, Positive = Accelerating</li>
+                            <li><strong>Y-Axis (Left/Right):</strong> Measures side-to-side forces during turns or side impacts</li>
+                            <li><strong>Z-Axis (Up/Down):</strong> Measures vertical forces from bumps, jumps, or rollovers. Normal gravity = 9.8 G</li>
+                        </ul>
+                    </div>
+
+                    <div class="parameter-section">
+                        <div class="parameter-header">
+                            <div class="parameter-label">
+                                <span>X-Axis (→ Forward)</span>
+                                <div class="tooltip">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext">
+                                        <strong>Forward/Backward Force</strong><br>
+                                        • <strong>Positive:</strong> Accelerating forward<br>
+                                        • <strong>Negative:</strong> Braking or rear impact<br>
+                                        • <strong>Normal Range:</strong> -5 to +5 G<br>
+                                        • <strong>Accident Range:</strong> Beyond ±15 G
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="parameter-value" id="acc-x-value">0 G</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="acc-x" min="-50" max="50" value="0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="parameter-section">
+                        <div class="parameter-header">
+                            <div class="parameter-label">
+                                <span>Y-Axis (← Left/Right →)</span>
+                                <div class="tooltip">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext">
+                                        <strong>Side-to-Side Force</strong><br>
+                                        • <strong>Positive:</strong> Force pushing right<br>
+                                        • <strong>Negative:</strong> Force pushing left<br>
+                                        • <strong>Normal Range:</strong> -3 to +3 G<br>
+                                        • <strong>Accident Range:</strong> Beyond ±10 G
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="parameter-value" id="acc-y-value">0 G</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="acc-y" min="-50" max="50" value="0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="parameter-section">
+                        <div class="parameter-header">
+                            <div class="parameter-label">
+                                <span>Z-Axis (↑ Up/Down ↓)</span>
+                                <div class="tooltip">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext">
+                                        <strong>Vertical Force</strong><br>
+                                        • <strong>Normal:</strong> 9.8 G (gravity)<br>
+                                        • <strong>Above 9.8:</strong> Upward force (going over bump)<br>
+                                        • <strong>Below 9.8:</strong> Downward force (hitting hole)<br>
+                                        • <strong>Accident Range:</strong> Below 5 or above 20 G
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="parameter-value" id="acc-z-value">9.8 G</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="acc-z" min="0" max="60" value="9.8" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gyroscope Controls -->
+                <div class="card">
+                    <h2>🌀 Gyroscope (Rotation)</h2>
+                    
+                    <div class="educational-info">
+                        <h3>📚 What is a Gyroscope?</h3>
+                        <ul>
+                            <li><strong>X-Axis (Pitch):</strong> Forward/backward tilting (nose up/down). Like nodding your head</li>
+                            <li><strong>Y-Axis (Roll):</strong> Side-to-side tilting (leaning left/right). Like tilting your head sideways</li>
+                            <li><strong>Z-Axis (Yaw):</strong> Spinning around (turning left/right). Like shaking your head "no"</li>
+                        </ul>
+                    </div>
+
+                    <div class="parameter-section">
+                        <div class="parameter-header">
+                            <div class="parameter-label">
+                                <span>X-Axis (Pitch ↻)</span>
+                                <div class="tooltip">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext">
+                                        <strong>Forward/Backward Tilt</strong><br>
+                                        • <strong>Positive:</strong> Nose going up<br>
+                                        • <strong>Negative:</strong> Nose going down<br>
+                                        • <strong>Normal Range:</strong> -5 to +5 °/s<br>
+                                        • <strong>Accident Range:</strong> Beyond ±20 °/s
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="parameter-value" id="gyro-x-value">0 °/s</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="gyro-x" min="-50" max="50" value="0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="parameter-section">
+                        <div class="parameter-header">
+                            <div class="parameter-label">
+                                <span>Y-Axis (Roll ↺)</span>
+                                <div class="tooltip">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext">
+                                        <strong>Side-to-Side Tilt</strong><br>
+                                        • <strong>Positive:</strong> Tilting right<br>
+                                        • <strong>Negative:</strong> Tilting left<br>
+                                        • <strong>Normal Range:</strong> -3 to +3 °/s<br>
+                                        • <strong>Accident Range:</strong> Beyond ±15 °/s (rollover!)
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="parameter-value" id="gyro-y-value">0 °/s</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="gyro-y" min="-50" max="50" value="0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="parameter-section">
+                        <div class="parameter-header">
+                            <div class="parameter-label">
+                                <span>Z-Axis (Yaw ⟲)</span>
+                                <div class="tooltip">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext">
+                                        <strong>Spinning Around</strong><br>
+                                        • <strong>Positive:</strong> Spinning counter-clockwise<br>
+                                        • <strong>Negative:</strong> Spinning clockwise<br>
+                                        • <strong>Normal Range:</strong> -5 to +5 °/s<br>
+                                        • <strong>Accident Range:</strong> Beyond ±20 °/s (spin-out!)
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="parameter-value" id="gyro-z-value">0 °/s</span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="gyro-z" min="-50" max="50" value="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preset Scenarios -->
+                <div class="card">
+                    <h2>⚡ Quick Test Scenarios</h2>
+                    <div class="preset-buttons">
+                        <button class="preset-btn accident" onclick="loadPreset('severe_collision')">💥 Severe Collision</button>
+                        <button class="preset-btn accident" onclick="loadPreset('side_impact')">🚗 Side Impact</button>
+                        <button class="preset-btn accident" onclick="loadPreset('rear_hit')">🚛 Rear Hit</button>
+                        <button class="preset-btn accident" onclick="loadPreset('sudden_brake')">🚦 Sudden Brake</button>
+                        <button class="preset-btn safe" onclick="loadPreset('normal_riding')">🚴 Normal Riding</button>
+                        <button class="preset-btn safe" onclick="loadPreset('normal_braking')">🛑 Normal Braking</button>
+                        <button class="preset-btn safe" onclick="loadPreset('aggressive_acceleration')">🏎️ Fast Accel</button>
+                        <button class="preset-btn safe" onclick="loadPreset('high_speed_cruise')">🏁 Highway Cruise</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Visualization and Results -->
+            <div class="right-panel">
+                <!-- Bike Visualization -->
+                <div class="card vehicle-visualization">
+                    <div class="speedometer" id="speedometer">
+                        <div>🚴 <span class="speedometer-value" id="speedometer-display">50</span> km/h</div>
+                    </div>
+                    
+                    <div class="vehicle-container">
+                        <div class="vehicle" id="vehicle">
+                            <div class="bike-rider"></div>
+                            <div class="vehicle-windshield"></div>
+                            <div class="vehicle-body"></div>
+                            <div class="vehicle-wheel left"></div>
+                            <div class="vehicle-wheel right"></div>
+                            <div class="impact-effect">
+                                <div class="force-arrow arrow-x" id="arrow-x"></div>
+                                <div class="force-arrow arrow-y" id="arrow-y"></div>
+                                <div class="force-arrow arrow-z" id="arrow-z"></div>
+                                <div class="rotation-indicator" id="rotation"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vehicle-status" id="vehicle-status">
+                        Adjust parameters to simulate bike behavior
+                    </div>
+                </div>
+
+                <!-- Model Selection -->
+                <div class="card" style="padding: 20px;">
+                    <h2>🤖 Detection Model</h2>
+                    <div style="display: flex; gap: 10px; flex-direction: column;">
+                        <label style="display: flex; align-items: center; cursor: pointer; padding: 10px; border: 2px solid #3498db; border-radius: 8px; background: rgba(52, 152, 219, 0.1);">
+                            <input type="radio" name="model" value="rule-based" checked style="margin-right: 10px; width: 20px; height: 20px;">
+                            <div>
+                                <strong>⚙️ Rule-Based System</strong>
+                                <div style="font-size: 12px; color: #7f8c8d; margin-top: 4px;">
+                                    Physics thresholds • Fast • Explainable
+                                </div>
+                            </div>
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer; padding: 10px; border: 2px solid #e74c3c; border-radius: 8px; background: rgba(231, 76, 60, 0.1);">
+                            <input type="radio" name="model" value="ml" style="margin-right: 10px; width: 20px; height: 20px;">
+                            <div>
+                                <strong>🤖 Machine Learning (Random Forest)</strong>
+                                <div style="font-size: 12px; color: #7f8c8d; margin-top: 4px;">
+                                    Trained on 127K samples • 100% accuracy
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="ml-status" style="margin-top: 10px; padding: 8px; background: #f39c12; color: white; border-radius: 5px; font-size: 13px; display: none;">
+                        ⚠️ ML model not loaded. Using rule-based system.
+                    </div>
+                </div>
+
+                <!-- Detection Button -->
+                <button class="detect-button" onclick="detectAccident()">
+                    🔍 Run Detection Analysis
+                </button>
+
+                <!-- Results -->
+                <div class="card results-card">
+                    <h2>📊 Detection Results</h2>
+                    <div class="detection-result" id="detection-result">
+                        Waiting for detection...
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Confidence</div>
+                            <div class="metric-value" id="confidence">-</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Speed</div>
+                            <div class="metric-value" id="result-speed">-</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">G-Force</div>
+                            <div class="metric-value" id="g-force">-</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Rotation</div>
+                            <div class="metric-value" id="rotation-value">-</div>
+                        </div>
+                    </div>
+
+                    <div class="educational-info" style="margin-top: 20px;">
+                        <h3>🎯 Understanding Results</h3>
+                        <p><strong>Confidence:</strong> How certain the model is about detection (0-100%)</p>
+                        <p><strong>G-Force:</strong> Total acceleration magnitude. 1 G = Earth's gravity</p>
+                        <p><strong>Rotation:</strong> Total angular velocity. High values indicate tumbling/spinning</p>
+                        <p><strong>Speed Impact:</strong> Higher speeds amplify danger - even moderate forces become critical!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app_with_vehicle_speed.js"></script>
+</body>
+</html>
